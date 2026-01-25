@@ -9,18 +9,27 @@ const app = express();
 
 app.set('trust proxy', 1);  
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// CORS Middleware - Must be first!
 app.use(cors({
   origin: [
     'https://api.jmmi-its.my.id',
     'https://jmmi-its.my.id',
     'https://www.jmmi-its.my.id',
+    'http://localhost:3000', // For local development
   ],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400, // 24 hours
 }));
 
+// Handle preflight requests
+app.options('*', cors());
+
+// Other Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 
