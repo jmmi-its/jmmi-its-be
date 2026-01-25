@@ -16,6 +16,7 @@ app.use(cors({
   origin: [
     'https://api.jmmi-its.my.id',
     'https://jmmi-its.my.id',
+    'https://www.jmmi-its.my.id',
   ],
   credentials: true,
 }));
