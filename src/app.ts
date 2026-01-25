@@ -14,9 +14,15 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 
+
 // Health Check
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date() });
+});
+
+// Ping Check
+app.get('/ping', (_req, res) => {
+  res.status(200).json({ message: 'pong' });
 });
 
 // Feature Routes
