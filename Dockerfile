@@ -30,6 +30,7 @@ RUN npm ci --only=production
 
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 # Copy generated prisma client (if located in node_modules)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
