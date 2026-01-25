@@ -1,24 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "baseUrl": "./",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "typeRoots": ["./node_modules/@types"],
-    "types": ["node"],
-    "strict": true,
-    "outDir": "./dist",
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
+    "target": "es2022",
+    "module": "node16",
+    "lib": ["ES2022", "DOM"],
+    "moduleResolution": "node16",
+    "rootDir": ".",
+    "outDir": "build",
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false,
     "esModuleInterop": true,
-    "removeComments": true
+    "skipLibCheck": true
   },
-  "tsc-alias": {
-    "resolveFullPaths": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "__tests__", "coverage"]
+  "include": ["src", "__tests__"]
 }

@@ -1,442 +1,121 @@
-# 🚀 Express + TypeScript + Prisma + PostgreSQL Boilerplate (2025 Edition)
+# node-typescript-boilerplate
 
-This is a backend built with Node.js, Express, TypeScript, and Prisma ORM. It follows modern best practices for API development, including strict type safety, structured error handling, security measures, and environment validation.
+[![Sponsor][sponsor-badge]][sponsor]
+[![TypeScript version][ts-badge]][typescript-5-7]
+[![Node.js version][nodejs-badge]][nodejs]
+[![APLv2][license-badge]][license]
+[![Build Status - GitHub Actions][gha-badge]][gha-ci]
 
-Designed to be modular and maintainable, the project features a clean architecture, making it easy to extend with new functionalities.
+👩🏻‍💻 Developer Ready: A comprehensive template. Works out of the box for most [Node.js][nodejs] projects.
 
-## ✨ Features
+🏃🏽 Instant Value: All basic tools included and configured:
 
-🛠️ Core Features\
-✅ TypeScript – Fully typed backend for maintainability\
-✅ Express.js – Lightweight and fast web framework\
-✅ Prisma ORM – Type-safe database interactions
-✅ PostgreSQL – Relational database\
-\
-🎯 Development & Code Quality\
-✅ Feature-Based Structure – Each feature has its own folder, keeping everything related to a feature (routes, schemas, types, services, controllers, repositories) together for better maintainability and scalability\
-✅ ESLint + Prettier – Code linting, formatting and autoformat on save\
-✅ Zod Validation – Strict schema validation for request & environment variables\
-✅ VSCode debugger\
-\
-🔐 Environment & Security\
-✅ Environment Validation – Ensures required .env variables exist\
-✅ Helmet & Security Headers – Protects against web vulnerabilities\
-✅ Rate Limiter, Host whitelisting middleware\
-\
-⚡ API & Middleware\
-✅ Request Validation – Uses Zod for body, params, and query validation\
-✅ Error Handling Middleware – Centralized error handling with PostgreSQL error handling [(Ref)](https://www.prisma.io/docs/orm/reference/error-reference)\
-✅ Unified Response Structure – Uses [uni-response](https://github.com/sushantrahate/uni-response) for consistent API responses\
-\
-🧪 Testing & CI/CD\
-✅ Vitest – Unit and integration testing\
-✅ Husky + Lint-Staged – Enforces pre-commit linting and testing\
-\
-🛑 Server Management\
-✅ Graceful Shutdown – Ensures proper cleanup of database & open connections during shutdown [(Ref)](https://github.com/sushantrahate/secure-nodejs-backend/tree/main/graceful-shutdown)
+- [TypeScript][typescript] [5.7][typescript-5-7]
+- [ESM][esm]
+- [ESLint][eslint] with some initial rules recommendation
+- [Vitest][vitest] for fast unit testing and code coverage
+- Type definitions for Node.js
+- [Prettier][prettier] to enforce consistent code style
+- NPM [scripts](#available-scripts) for common operations
+- [EditorConfig][editorconfig] for consistent coding style
+- Reproducible environments thanks to [Volta][volta]
+- Example configuration for [GitHub Actions][gh-actions]
+- Simple example of TypeScript code and unit test
 
-## 🛠️ Clean Architecture & Feature-Based Structure
+🤲 Free as in speech: available under the APLv2 license.
 
-### 📌 Clean Architecture & Framework-Agnostic Design
+## Getting Started
 
-This project follows a feature-based modular structure, where each feature (e.g., user) has its own isolated folder containing everything related to that feature.
+This project is intended to be used with the latest Active LTS release of [Node.js][nodejs].
 
-📂 Project Structure:
+### Use as a repository template
 
-```bash
-src/
-│── config/         # Configuration (e.g., environment variables, Prisma, security)
-│── constants/      # Shared constants (messages, enums, etc.)
-│── features/       # Feature-based modular structure
-│   ├── user/       # User feature module
-│   │   ├── __tests__/      # Unit tests (vitest)
-│   │   ├── controllers/    # Handles HTTP requests (Express-dependent)
-│   │   ├── repositories/   # Database interactions (Prisma-dependent)
-│   │   ├── routes/         # Express API routes (Express-dependent)
-│   │   ├── schemas/        # Zod validation schemas (Framework-agnostic)
-│   │   ├── services/       # Business logic (Completely framework-independent)
-│   │   ├── types/          # TypeScript interfaces & types
-│── middleware/      # Global Express middlewares
-│── utils/           # Helper functions
-│── app.ts           # Express app setup
-│── server.ts        # Entry point
-```
-### 📌 Layer-by-Layer Breakdown
+To start, just click the **[Use template][repo-template-action]** link (or the green button). Start adding your code in the `src` and unit tests in the `__tests__` directories.
 
-### 1️⃣ Feature Modules (e.g., user/)
+### Clone repository
 
-Each feature is self-contained, meaning everything related to "users" is inside `features/user/`
-
-🎯 Benefit:\
-💡 You can easily add or remove features without affecting other parts of the app.
-
-🔹 **No Cluttering, Even as the Project Grows Large –** The feature-based structure ensures that related files stay together, preventing scattered code.\
-🔹 **Everything in One Place –** Developers can find all logic related to a feature (controllers, services, repositories, schemas) in a single folder, reducing confusion.\
-🔹 **No Ambiguity in Large Systems –** Since each feature is self-contained, developers always know which controller, service, or repository to use, making onboarding and scaling easier.\
-🔹 **Scalability & Maintainability –** Adding a new feature means simply creating a new folder under features/, without modifying unrelated parts of the app.
-
-### 2️⃣ Controllers (controllers/)
-
-✅ Handles HTTP requests and responses\
-✅ Calls the service layer for business logic\
-✅ Only responsible for Express-specific logic
-
-📄 Example: user.controller.ts
-
-```ts
-import { Request, Response } from "express";
-import { UserService } from "../services/user.service";
-
-export class UserController {
-  private userService: UserService;
-
-  constructor() {
-    this.userService = new UserService();
-  }
-
-  async getUsers(req: Request, res: Response) {
-    const users = await this.userService.getAllUsers();
-    res.json({ success: true, data: users });
-  }
-}
-```
-
-### 🛠️ Why This Structure?\
-
-Express-specific logic stays here (e.g., req, res)\
-Business logic is in the service layer (so it’s framework-agnostic)
-
-🎯 Benefit:\
-💡 Can switch from Express to Fastify/NestJS by just changing the controllers.
-
-### 3️⃣ Services (services/)
-
-✅ Contains core business logic\
-✅ Does NOT depend on Express or Prisma\
-✅ Interacts with repositories for data retrieval\
-
-📄 Example: user.service.ts
-
-```ts
-import { UserRepository } from "../repositories/user.repository";
-
-export class UserService {
-  private userRepository: UserRepository;
-
-  constructor() {
-    this.userRepository = new UserRepository();
-  }
-
-  async getAllUsers() {
-    return await this.userRepository.getUsers();
-  }
-}
-```
-
-### 🛠️ Why This Structure?
-
-- No dependency on Express or HTTP requests
-- Calls repository for database access
-
-🎯 Benefit:\
-💡 Can be reused in a CLI app, background worker, or GraphQL API without changes.
-
-
-### 4️⃣ Repositories (repositories/)
-
-✅ Handles all database queries\
-✅ Uses Prisma (or any ORM, easily replaceable)\
-✅ Interacts only with services/, never controllers
-
-📄 Example: user.repository.ts
-
-```ts
-import { prisma } from "@/config/prisma.config";
-
-export class UserRepository {
-  async getUsers() {
-    return await prisma.user.findMany();
-  }
-}
-```
-
-### 🛠️ Why This Structure?
-
-- Keeps database logic separate from business logic
-- Easy to swap Prisma for another ORM (e.g., Drizzle, TypeORM)
-
-🎯 Benefit:\
-💡 Can change the database or ORM without affecting services/controllers.
-
-### 5️⃣ Routes (routes/)
-
-✅ Defines API endpoints\
-✅ Maps controllers to Express routes
-
-📄 Example: user.routes.ts
-
-```ts
-import { Router } from "express";
-import { UserController } from "../controllers/user.controller";
-
-const router = Router();
-const userController = new UserController();
-
-router.get("/", (req, res) => userController.getUsers(req, res));
-
-export default router;
-```
-
-### 🛠️ Why This Structure?
-
-- Controllers are injected into routes for better testability
-- Only Express-dependent part is here
-
-🎯 Benefit:\
-💡 Can switch to NestJS, Fastify, or Hono by only changing routes & controllers.
-
-### 6️⃣ Validation Schemas (schemas/)
-
-✅ Uses Zod for request validation
-✅ Completely framework-independent
-
-📄 Example: user.schema.ts
-
-```ts
-import { z } from "zod";
-
-export const createUserSchema = z.object({
-  email: z.string().email(),
-  name: z.string().optional(),
-});
-```
-
-### 🛠️ Why This Structure?
-
-- Schemas don’t depend on Express, so they can be used anywhere
-- Validation logic is reusable (can be used in GraphQL, CLI, or workers)
-- 
-🎯 Benefit:\
-💡 Easier to enforce validation rules across different application layers.
-
-### 🛠️ Final Benefits Summary
-<table>
-  <thead>
-    <tr>
-      <th>Layer</th>
-      <th>Purpose</th>
-      <th>Benefit</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Controllers</strong></td>
-      <td>Handle HTTP requests</td>
-      <td>Framework-dependent, easily replaceable</td>
-    </tr>
-    <tr>
-      <td><strong>Services</strong></td>
-      <td>Business logic</td>
-      <td>Framework-agnostic, reusable anywhere</td>
-    </tr>
-    <tr>
-      <td><strong>Repositories</strong></td>
-      <td>Database interactions</td>
-      <td>Can switch ORM (Prisma, TypeORM, Drizzle)</td>
-    </tr>
-    <tr>
-      <td><strong>Routes</strong></td>
-      <td>Maps controllers to APIs</td>
-      <td>Only responsible for Express routing</td>
-    </tr>
-    <tr>
-      <td><strong>Schemas</strong></td>
-      <td>Data validation</td>
-      <td>Reusable validation logic across app</td>
-    </tr>
-  </tbody>
-</table>
-
-## ✨ Setup from scratch
-
-## ⚡ TypeScript & Development Dependencies Setup
-
-```bash
-mkdir express-ts-prisma && cd express-ts-prisma
-npm init -y
-```
-
-```bash
-npm install --save-dev typescript tsx nodemon @types/node tsc-alias
-```
-
-> Create `tsconfig.json`
-
-## ⚡ Add Express, CORS, and .env Setup
-
-```bash
-npm install express cors dotenv
-npm install --save-dev @types/express @types/cors
-```
-
-> Create `.env.dev` File from `.env.example`
-> Create src/config/env-config.ts // Env Configuration file
-> Create src/config/env-schema.ts // Schema for environment variables
-
-## ⚡ ESLint, Prettier & Linting Plugins
-
-```bash
-npm install --save-dev eslint prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-prettier eslint-plugin-node eslint-plugin-import eslint-plugin-simple-import-sort eslint-plugin-unicorn eslint-plugin-security eslint-config-prettier
-```
-
-> Create `eslint.config.js`
-
-> Create `.prettierrc.json`
-
-> Create `.prettierignore`
-
-📌 Prettier will ignore these files & folders (same format as `.gitignore`).
-
-> create `.vscode/settings.json` to Autoformat using Prettier on save
-
-## ⚡ Setup Prisma & PostgreSQL
-
-> Create Database and Shadow Database
-
-> Update `.env.dev` File
-
-```ini
-DATABASE_URL="postgresql://dev_user:dev_password@localhost:5432/dev_db"
-SHADOW_DATABASE_URL="postgresql://dev_user:dev_password@localhost:5432/dev_db_shadow"
-```
-
-### Install Prisma
-
-```bash
-npm install @prisma/client
-npm install --save-dev prisma
-```
-
-### Initialize Prisma
-
-```bash
-npx prisma init
-```
-
-### Modify prisma/schema.prisma
-
-```js
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-}
-```
-
-### Run Migrations
-
-```bash
-npx prisma generate
-npx prisma migrate dev --name init
-```
-
-## ⚡ Create Express Server
-
-### Create `src/server.ts`
-
-## ⚡ Setup Husky + Lint-Staged
-
-```bash
-npm install --save-dev husky lint-staged
-```
-
-### Enable Husky
-
-```bash
-npx husky install
-npm set-script prepare "husky install"
-```
-
-### Add Pre-commit Hook
-
-```bash
-npx husky add .husky/pre-commit "npx lint-staged"
-```
-
-Modify `package.json`
-
-```json
-// Runs linters (ESLint, Prettier) only on changed files before committing.
-"lint-staged": {
-   "**/*.{ts,json,md}": ["eslint --fix", "prettier --write"]
-}
-```
-
-Add Pre-Push Hook
+To clone the repository, use the following commands:
 
 ```sh
-// Before git push trigger tests & build validation.
-npx husky add .husky/pre-push "npm run lint && npm run format && npm run test && npm run build"
+git clone https://github.com/jsynowiec/node-typescript-boilerplate
+cd node-typescript-boilerplate
+npm install
 ```
 
-## ⚡ Add Scripts in package.json
+### Download latest release
 
-```json
-"scripts": {
-    "prebuild": "npm run lint && npm run format && npm run test",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "nodemon --ext ts --exec tsx src/server.ts",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext ts --fix",
-    "format": "prettier --write .",
-    "test": "vitest",
-    "prepare": "npx husky install"
-  }
-```
-
-## ⚡ Run the Project
-
-```bash
-# Start Dev Server
-npm run dev
-
-# Lint Code
-npm run lint
-npm run lint:fix
-
-# Format Code
-npm run format
-```
-
-## ⚡ Vitest for Unit Testing
-
-```bash
-npm install --save-dev vitest @vitest/coverage-v8 @types/jest supertest @types/supertest
-```
-
-Create test files at `src\features\user\__tests__`
-
-## ⚡ Security
+Download and unzip the current **main** branch or one of the tags:
 
 ```sh
-npm i helmet express-rate-limit
+wget https://github.com/jsynowiec/node-typescript-boilerplate/archive/main.zip -O node-typescript-boilerplate.zip
+unzip node-typescript-boilerplate.zip && rm node-typescript-boilerplate.zip
 ```
 
-## ⚡ Logger
+## Available Scripts
 
-```bash
-npm install pino pino-pretty pino-http
-npm install -D @types/pino @types/pino-pretty @types/pino-http
-```
+- `clean` - remove coverage data, cache and transpiled files,
+- `prebuild` - lint source files and tests before building,
+- `build` - transpile TypeScript to ES6,
+- `build:watch` - interactive watch mode to automatically transpile source files,
+- `lint` - lint source files and tests,
+- `prettier` - reformat files,
+- `test` - run tests,
+- `test:watch` - interactive watch mode to automatically re-run tests
+- `test:coverage` - run test and print out test coverage
 
-Create src\middleware\pino-logger.ts
+## Additional Information
 
-## ⚡ Constants
+### Why include Volta
 
-## ⚡ Middleware
+I recommend to [install][volta-getting-started] Volta and use it to manage your project's toolchain.
 
-## ⚡ Utils
+[Volta][volta]’s toolchain always keeps track of where you are, it makes sure the tools you use always respect the settings of the project you’re working on. This means you don’t have to worry about changing the state of your installed software when switching between projects. For example, it's [used by engineers at LinkedIn][volta-tomdale] to standardize tools and have reproducible development environments.
 
-If you liked it then please show your love by ⭐ the repo
+### Why Vitest instead of Jest
+
+I recommend using [Vitest][vitest] for unit and integration testing of your TypeScript code.
+
+In 2023, my team and I gradually switched from Jest to [Vitest][vitest] in all the projects. We've found out that generally, Vitest is faster than Jest, especially for large test suits. Furthermore, Vitest has native support for ES modules, is easier to configure, and has a much nicer developer experience when used with TypeScript. For example, when working with mocks, spies and types.
+
+Nevertheless, the choice of specific tooling always depends on the specific requirements and characteristics of the project.
+
+### ES Modules
+
+This template uses native [ESM][esm]. Make sure to read [this][nodejs-esm], and [this][ts47-esm] first.
+
+If your project requires CommonJS, you will have to [convert to ESM][sindresorhus-esm].
+
+Please do not open issues for questions regarding CommonJS or ESM on this repo.
+
+## Backers & Sponsors
+
+Support this project by becoming a [sponsor][sponsor].
+
+## License
+
+Licensed under the APLv2. See the [LICENSE](https://github.com/jsynowiec/node-typescript-boilerplate/blob/main/LICENSE) file for details.
+
+[ts-badge]: https://img.shields.io/badge/TypeScript-5.7-blue.svg
+[nodejs-badge]: https://img.shields.io/badge/Node.js-22-blue.svg
+[nodejs]: https://nodejs.org/dist/latest-v22.x/docs/api/
+[gha-badge]: https://github.com/jsynowiec/node-typescript-boilerplate/actions/workflows/nodejs.yml/badge.svg
+[gha-ci]: https://github.com/jsynowiec/node-typescript-boilerplate/actions/workflows/nodejs.yml
+[typescript]: https://www.typescriptlang.org/
+[typescript-5-7]: https://devblogs.microsoft.com/typescript/announcing-typescript-5-7/
+[license-badge]: https://img.shields.io/badge/license-APLv2-blue.svg
+[license]: https://github.com/jsynowiec/node-typescript-boilerplate/blob/main/LICENSE
+[sponsor-badge]: https://img.shields.io/badge/♥-Sponsor-fc0fb5.svg
+[sponsor]: https://github.com/sponsors/jsynowiec
+[eslint]: https://github.com/eslint/eslint
+[prettier]: https://prettier.io
+[volta]: https://volta.sh
+[volta-getting-started]: https://docs.volta.sh/guide/getting-started
+[volta-tomdale]: https://twitter.com/tomdale/status/1162017336699838467
+[gh-actions]: https://github.com/features/actions
+[repo-template-action]: https://github.com/jsynowiec/node-typescript-boilerplate/generate
+[esm]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+[sindresorhus-esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+[nodejs-esm]: https://nodejs.org/docs/latest-v16.x/api/esm.html
+[ts47-esm]: https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#esm-nodejs
+[editorconfig]: https://editorconfig.org
+[vitest]: https://vitest.dev

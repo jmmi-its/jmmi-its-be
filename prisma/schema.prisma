@@ -1,33 +1,57 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model User {
+model Category {
   id        String   @id @default(uuid())
-  firstName String?
-  lastName  String?
-  email     String   @unique
-  password  String?
-  roleId    String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  // Relationships
-  role      Roles?   @relation(fields: [roleId], references: [id])
+  title     String
+  weight    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  folders   Folder[]
+
+  @@map("categories")
 }
 
-model Roles {
-  id     String @id @default(uuid())
-  name   String
-  active Int    @default(1) @db.SmallInt
-  user   User[]
+model Folder {
+  id          String       @id @default(uuid())
+  categoryId  String       @map("category_id")
+  title       String
+  weight      Int          @default(0)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subheadings Subheading[]
+  links       Link[]
+
+  @@map("folders")
+}
+
+model Subheading {
+  id        String   @id @default(uuid())
+  folderId  String   @map("folder_id")
+  title     String
+  weight    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  folder    Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  links     Link[]
+
+  @@map("subheadings")
+}
+
+model Link {
+  id           String      @id @default(uuid())
+  folderId     String?     @map("folder_id")
+  subheadingId String?     @map("subheading_id")
+  title        String
+  url          String
+  weight       Int         @default(0)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  folder       Folder?     @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  subheading   Subheading? @relation(fields: [subheadingId], references: [id], onDelete: Cascade)
+
+  @@map("links")
 }

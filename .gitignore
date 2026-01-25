@@ -1,26 +1,29 @@
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+# Logs
+logs
+*.log
+npm-debug.log*
 
-# misc
-npm-debug.log
-testem.log
-
-# System Files
-.DS_Store
-Thumbs.db
-
-# Local env files
-.env
-.env.dev
-
-# Ignore Node.js modules
+# Dependencies
 node_modules/
-dist/
 
-info.txt
-src/logs/*
+# Coverage
+coverage
+
+# Transpiled files
+build/
+
+# VS Code
+.vscode
+!.vscode/tasks.js
+
+# JetBrains IDEs
+.idea/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Misc
+.DS_Store

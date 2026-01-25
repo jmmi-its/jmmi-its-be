@@ -1,51 +1,30 @@
+import express from 'express';
 import cors from 'cors';
-import express, { Application, Request, Response } from 'express';
 import helmet from 'helmet';
+import morgan from 'morgan';
+import { linksRouter } from './features/links/routes.js';
+import config from './config/env.js';
 
-import { env } from './config/env-config';
-import userRoutes from './features/user/routes/user.routes';
-import { apiErrorHandler, unmatchedRoutes } from './middleware/api-error.middleware';
-import { pinoLogger, loggerMiddleware } from './middleware/pino-logger';
-// import morgan from 'morgan';
-import { hostWhitelist, rateLimiter } from './middleware/security.middleware';
+const app = express();
 
-const app: Application = express();
-
-// Security middleware
-// app.use(hostWhitelist);
-app.use(rateLimiter);
-app.use(helmet());
-
-// Global Middlewares
+// Middleware
 app.use(express.json());
-app.use(cors()); // Enables CORS
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(helmet());
+app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 
-// TODO: logger
-app.use(loggerMiddleware);
-app.use(pinoLogger);
-// if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
-
-const allowedURLs = env.WHITE_LIST_URLS || [];
-
-app.get('/', hostWhitelist(allowedURLs), (req: Request, res: Response): void => {
-  res.json('');
-  return;
+// Health Check
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date() });
 });
 
-app.get('/heartbeat', (req: Request, res: Response): void => {
-  req.log.info('Heartbeat ok');
-  res.send('ok');
-  return;
+// Feature Routes
+app.use('/api/links', linksRouter);
+
+// 404 Handler
+app.use((_req, res) => {
+  res.status(404).json({ message: 'Resource not found' });
 });
 
-// API Routes
-app.use('/v1/users', userRoutes);
-
-// Error Handling Middleware (Optional)
-// For prisma error and other error
-app.use(apiErrorHandler);
-
-// Middleware for handling unmatched routes
-app.use(unmatchedRoutes);
-
-export { app };
+export default app;
