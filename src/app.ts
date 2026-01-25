@@ -24,8 +24,8 @@ app.use(cors({
   maxAge: 86400, // 24 hours
 }));
 
-// Handle preflight requests
-app.options('*', cors());
+// Handle preflight requests - Regex used to avoid Express 5 wildcard error
+app.options(/(.*)/, cors());
 
 // Other Middleware
 app.use(express.json());
