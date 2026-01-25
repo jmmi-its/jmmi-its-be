@@ -7,10 +7,19 @@ import config from './config/env.js';
 
 const app = express();
 
+app.set('trust proxy', 1);  
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://api.jmmi-its.my.id',
+    'https://jmmi-its.my.id',
+  ],
+  credentials: true,
+}));
+
 app.use(helmet());
 app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 
