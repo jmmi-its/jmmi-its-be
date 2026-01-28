@@ -1,4 +1,4 @@
-import { AnnouncementsRepository } from './repository.js';
+import prisma from '../../utils/db.js';
 
 interface CheckResult {
   status: 'passed' | 'failed';
@@ -7,15 +7,25 @@ interface CheckResult {
   message?: string;
 }
 
+// Define interface locally since generated types might be missing locally
+interface StaffAnnouncementModel {
+  id: string;
+  nrp: string;
+  name: string;
+  codename: string;
+  createdAt: Date;
+  viewedAt: Date | null;
+}
+
 export class AnnouncementsService {
-  private repository: AnnouncementsRepository;
-
-  constructor() {
-    this.repository = new AnnouncementsRepository();
-  }
-
   async checkStatus(nrp: string): Promise<CheckResult> {
-    const announcement = await this.repository.findByNrp(nrp);
+    // Access prisma directly like in LinksService
+    // Casting to unknown first to avoid TS errors if types are not generated locally
+    const announcement = (await prisma.staffAnnouncement.findUnique({
+      where: {
+        nrp,
+      },
+    })) as unknown as StaffAnnouncementModel | null;
 
     if (!announcement) {
       return {
@@ -23,14 +33,6 @@ export class AnnouncementsService {
         name: 'Peserta Seleksi Staff Muda JMMI ITS 2026',
       };
     }
-
-    // Optional: Check if already viewed
-    // if (announcement.viewedAt) {
-    //   return { status: 'failed', message: 'Result already viewed' }; // Or handle as needed
-    // }
-
-    // Optional: Mark as viewed
-    // await this.repository.markAsViewed(announcement.id);
 
     return {
       status: 'passed',
