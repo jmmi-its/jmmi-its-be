@@ -16,6 +16,8 @@ app.use(cors({
     'https://api.jmmi-its.my.id',
     'https://jmmi-its.my.id',
     'https://www.jmmi-its.my.id',
+    'https://jmmi-its.com',
+    'https://www.jmmi-its.com',
     'http://localhost:3000', // For local development
   ],
   credentials: true,
