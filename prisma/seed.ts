@@ -1,10 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
 });
 
-async function main() {
+async function main(): Promise<void> {
   console.log('Start seeding ...');
 
   const staffAnnouncements = [
