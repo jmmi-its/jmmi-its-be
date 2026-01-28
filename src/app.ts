@@ -47,7 +47,7 @@ app.get('/ping', (_req, res) => {
 
 // Feature Routes
 app.use('/api/links', linksRouter);
-app.use('/api/v1/announcement', announcementRouter);
+app.use('/api/announcement', announcementRouter);
 
 // 404 Handler
 app.use((_req, res) => {
