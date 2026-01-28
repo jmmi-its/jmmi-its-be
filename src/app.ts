@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { linksRouter } from './features/links/routes.js';
+import { announcementRouter } from './features/announcements/routes.js';
 import config from './config/env.js';
 
 const app = express();
@@ -46,6 +47,7 @@ app.get('/ping', (_req, res) => {
 
 // Feature Routes
 app.use('/api/links', linksRouter);
+app.use('/api/v1/announcement', announcementRouter);
 
 // 404 Handler
 app.use((_req, res) => {

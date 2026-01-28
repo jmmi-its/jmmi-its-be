@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Category {
@@ -53,4 +54,16 @@ model Link {
   subheading   Subheading? @relation(fields: [subheadingId], references: [id], onDelete: Cascade)
 
   @@map("links")
+}
+
+model StaffAnnouncement {
+  id        String    @id @default(uuid())
+  nrp       String    @unique
+  name      String
+  codename  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  viewedAt  DateTime? @map("viewed_at")
+
+  @@index([nrp])
+  @@map("staff_announcements")
 }
