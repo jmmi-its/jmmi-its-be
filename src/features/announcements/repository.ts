@@ -1,6 +1,5 @@
-import { PrismaClient, StaffAnnouncement } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { StaffAnnouncement } from '@prisma/client';
+import prisma from '../../utils/db.js';
 
 export class AnnouncementsRepository {
   async findByNrp(nrp: string): Promise<StaffAnnouncement | null> {
