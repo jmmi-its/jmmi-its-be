@@ -6,6 +6,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum FinanceType {
+  income
+  expenses
+}
+
 model Category {
   id        String   @id @default(uuid())
   title     String
@@ -65,4 +70,48 @@ model StaffAnnouncement {
 
   @@index([nrp])
   @@map("staff_announcements")
+}
+
+model FinanceTransaction {
+  id            String      @id @default(uuid())
+  type          FinanceType
+  description   String
+  amount        Int
+  transactionAt DateTime    @map("transaction_at")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@index([transactionAt])
+  @@index([type])
+  @@map("finance_transactions")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@map("admins")
+}
+
+model CalendarEvent {
+  id         String   @id @default(uuid())
+  eventName  String   @map("event_name")
+  eventDate  DateTime @map("event_date")
+  eventTime  String   @map("event_time")
+  location   String
+  isRecurring Boolean @default(false) @map("is_recurring")
+  recurrenceType String? @map("recurrence_type")
+  recurrenceInterval Int @default(1) @map("recurrence_interval")
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([eventDate])
+  @@index([eventDate, eventTime])
+  @@map("calendar_events")
 }

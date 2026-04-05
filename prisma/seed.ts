@@ -9,6 +9,18 @@ const prisma = new PrismaClient({ adapter });
 async function main(): Promise<void> {
   console.log('Start seeding ...');
 
+  // Seed Admin
+  const admin = await prisma.admin.upsert({
+    where: { email: 'admin@jmmi.com' },
+    update: {},
+    create: {
+      email: 'admin@jmmi.com',
+      password: process.env.ADMIN_PASSWORD || 'adminPassword123',
+      name: 'Admin JMMI',
+    },
+  });
+  console.log(`Created admin: ${admin.name}`);
+
   const staffAnnouncements = [
     {
       nrp: '500000001',
@@ -35,6 +47,8 @@ async function main(): Promise<void> {
     });
     console.log(`Created staff announcement for: ${user.name}`);
   }
+
+
 
   console.log('Seeding finished.');
 }

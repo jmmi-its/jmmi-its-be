@@ -4,6 +4,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { linksRouter } from './features/links/routes.js';
 import { announcementRouter } from './features/announcements/routes.js';
+import { financeRouter } from './features/finance/routes.js';
+import { authRouter } from './features/auth/routes.js';
+import { calendarRouter } from './features/calendar/routes.js';
 import config from './config/env.js';
 
 const app = express();
@@ -48,8 +51,11 @@ app.get('/ping', (_req, res) => {
 });
 
 // Feature Routes
+app.use('/api/auth', authRouter);
 app.use('/api/links', linksRouter);
 app.use('/api/announcement', announcementRouter);
+app.use('/api/finance', financeRouter);
+app.use('/api/calendar', calendarRouter);
 
 // 404 Handler
 app.use((_req, res) => {
