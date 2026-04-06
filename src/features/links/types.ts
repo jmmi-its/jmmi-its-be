@@ -23,6 +23,7 @@ export interface Subheading {
 
 export interface Link {
   link_id: string;
+  category_id: string | null;
   folder_id: string | null;
   subheading_id: string | null;
   title: string;
@@ -34,6 +35,7 @@ export interface Link {
 // Responses
 export interface LinksHomepageData {
   categories: Category[];
+  category_links: Link[];
   folders: Folder[];
   general_links: Link[];
 }
@@ -69,6 +71,7 @@ export interface CreateSubheadingRequest {
 export type UpdateSubheadingRequest = Partial<CreateSubheadingRequest>;
 
 export interface CreateLinkRequest {
+  category_id?: string | null;
   folder_id?: string | null;
   subheading_id?: string | null;
   title: string;
@@ -104,6 +107,7 @@ export interface SubheadingModel {
 
 export interface LinkModel {
   id: string;
+  categoryId: string | null;
   folderId: string | null;
   subheadingId: string | null;
   title: string;

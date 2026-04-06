@@ -55,6 +55,7 @@ export class LinksService {
   private toLinkDTO(item: LinkModel): Link {
     return {
       link_id: item.id,
+      category_id: item.categoryId,
       folder_id: item.folderId,
       subheading_id: item.subheadingId,
       title: item.title,
@@ -77,12 +78,17 @@ export class LinksService {
     const categories = await prisma.category.findMany({ orderBy: { weight: 'desc' } }) as unknown as CategoryModel[];
     const folders = await prisma.folder.findMany({ orderBy: { weight: 'desc' } }) as unknown as FolderModel[];
     const generalLinks = await prisma.link.findMany({
-      where: { folderId: null },
+      where: { categoryId: null, folderId: null, subheadingId: null },
+      orderBy: { weight: 'desc' }
+    }) as unknown as LinkModel[];
+    const categoryLinks = await prisma.link.findMany({
+      where: { categoryId: { not: null }, folderId: null, subheadingId: null },
       orderBy: { weight: 'desc' }
     }) as unknown as LinkModel[];
 
     return {
       categories: categories.map(c => this.toCategoryDTO(c)),
+      category_links: categoryLinks.map(l => this.toLinkDTO(l)),
       folders: folders.map(f => this.toFolderDTO(f)),
       general_links: generalLinks.map(l => this.toLinkDTO(l))
     };
@@ -103,7 +109,7 @@ export class LinksService {
     }) as unknown as (SubheadingModel & { links: LinkModel[] })[];
 
     const directLinks = await prisma.link.findMany({
-      where: { folderId, subheadingId: null },
+      where: { folderId, subheadingId: null, categoryId: null },
       orderBy: { weight: 'desc' }
     }) as unknown as LinkModel[];
 
@@ -246,11 +252,15 @@ export class LinksService {
       weight: data.weight
     };
 
-    if (data.folder_id) {
-      createData.folder = { connect: { id: data.folder_id } };
-    }
     if (data.subheading_id) {
+      if (data.folder_id) {
+        createData.folder = { connect: { id: data.folder_id } };
+      }
       createData.subheading = { connect: { id: data.subheading_id } };
+    } else if (data.folder_id) {
+      createData.folder = { connect: { id: data.folder_id } };
+    } else if (data.category_id) {
+      createData.category = { connect: { id: data.category_id } };
     }
 
     const item = await prisma.link.create({ data: createData }) as unknown as LinkModel;
@@ -258,29 +268,39 @@ export class LinksService {
   }
 
   async updateLink(id: string, data: UpdateLinkRequest): Promise<Link> {
-     const updateData: Prisma.LinkUpdateInput = {};
-     if (data.title !== undefined) updateData.title = data.title;
-     if (data.link !== undefined) updateData.url = data.link; // map
-     if (data.weight !== undefined) updateData.weight = data.weight;
+    const updateData: Prisma.LinkUpdateInput = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.link !== undefined) updateData.url = data.link; // map
+    if (data.weight !== undefined) updateData.weight = data.weight;
 
-     if (data.folder_id !== undefined) {
-        if (data.folder_id === null) {
-            updateData.folder = { disconnect: true };
-        } else {
-            updateData.folder = { connect: { id: data.folder_id } };
-        }
-     }
-     
-     if (data.subheading_id !== undefined) {
-        if (data.subheading_id === null) {
-            updateData.subheading = { disconnect: true };
-        } else {
-            updateData.subheading = { connect: { id: data.subheading_id } };
-        }
-     }
+    if (data.subheading_id !== undefined && data.subheading_id !== null) {
+      if (data.folder_id !== undefined && data.folder_id !== null) {
+        updateData.folder = { connect: { id: data.folder_id } };
+      }
+      updateData.subheading = { connect: { id: data.subheading_id } };
+      updateData.category = { disconnect: true };
+      } else if (data.folder_id !== undefined && data.folder_id !== null) {
+        updateData.folder = { connect: { id: data.folder_id } };
+        updateData.subheading = { disconnect: true };
+        updateData.category = { disconnect: true };
+      } else if (data.category_id !== undefined && data.category_id !== null) {
+        updateData.category = { connect: { id: data.category_id } };
+        updateData.folder = { disconnect: true };
+        updateData.subheading = { disconnect: true };
+      } else {
+      if (data.category_id === null) {
+        updateData.category = { disconnect: true };
+      }
+      if (data.folder_id === null) {
+        updateData.folder = { disconnect: true };
+      }
+      if (data.subheading_id === null) {
+        updateData.subheading = { disconnect: true };
+      }
+    }
 
-     const item = await prisma.link.update({ where: { id }, data: updateData }) as unknown as LinkModel;
-     return this.toLinkDTO(item);
+    const item = await prisma.link.update({ where: { id }, data: updateData }) as unknown as LinkModel;
+    return this.toLinkDTO(item);
   }
 
   async deleteLink(id: string): Promise<void> {

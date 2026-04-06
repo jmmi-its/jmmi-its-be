@@ -48,12 +48,14 @@ model Subheading {
 
 model Link {
   id           String      @id @default(uuid())
+  categoryId   String?     @map("category_id")
   folderId     String?     @map("folder_id")
   subheadingId String?     @map("subheading_id")
   title        String
   url          String
   weight       Int         @default(0)
   createdAt    DateTime    @default(now()) @map("created_at")
+  category     Category?   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   folder       Folder?     @relation(fields: [folderId], references: [id], onDelete: Cascade)
   subheading   Subheading? @relation(fields: [subheadingId], references: [id], onDelete: Cascade)
 
