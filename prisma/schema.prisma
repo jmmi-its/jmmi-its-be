@@ -17,6 +17,7 @@ model Category {
   weight    Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
   folders   Folder[]
+  links     Link[]
 
   @@map("categories")
 }
