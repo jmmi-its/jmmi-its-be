@@ -21,6 +21,13 @@ import {
   LinkModel
 } from './types.js';
 
+class FolderAccessDeniedError extends Error {
+  constructor() {
+    super('Folder key is required or invalid');
+    this.name = 'FolderAccessDeniedError';
+  }
+}
+
 export class LinksService {
   // Private Mappers
   private toCategoryDTO(item: CategoryModel): Category {
@@ -36,6 +43,7 @@ export class LinksService {
     return {
       folder_id: item.id,
       category_id: item.categoryId,
+      is_locked: Boolean(item.accessKey),
       title: item.title,
       weight: item.weight,
       timestamp: item.createdAt.toISOString()
@@ -94,9 +102,12 @@ export class LinksService {
     };
   }
 
-  async getFolderDetail(folderId: string): Promise<FolderDetailData | null> {
+  async getFolderDetail(folderId: string, folderKey?: string): Promise<FolderDetailData | null> {
     const folder = await prisma.folder.findUnique({ where: { id: folderId } }) as unknown as FolderModel | null;
     if (!folder) return null;
+    if (folder.accessKey && folder.accessKey !== folderKey) {
+      throw new FolderAccessDeniedError();
+    }
 
     const subheadings = await prisma.subheading.findMany({
       where: { folderId },
@@ -166,12 +177,22 @@ export class LinksService {
   }
 
   async createFolder(data: CreateFolderRequest): Promise<Folder> {
+    const normalizedAccessKey = data.access_key?.trim() ? data.access_key.trim() : null;
+    const createData: Prisma.FolderCreateInput = {
+      title: data.title,
+      weight: data.weight
+    };
+
+    if (data.category_id) {
+      createData.category = { connect: { id: data.category_id } };
+    }
+
+    if (normalizedAccessKey) {
+      (createData as unknown as Record<string, unknown>).accessKey = normalizedAccessKey;
+    }
+
     const item = await prisma.folder.create({
-      data: {
-        title: data.title,
-        weight: data.weight,
-        category: { connect: { id: data.category_id } }
-      }
+      data: createData
     }) as unknown as FolderModel;
     return this.toFolderDTO(item);
   }
@@ -184,6 +205,13 @@ export class LinksService {
 
     if (data.category_id !== undefined && data.category_id) {
       updateData.category = { connect: { id: data.category_id } };
+    } else if (data.category_id === null) {
+      updateData.category = { disconnect: true };
+    }
+
+    if (data.access_key !== undefined) {
+      const normalizedAccessKey = data.access_key?.trim() ? data.access_key.trim() : null;
+      (updateData as unknown as Record<string, unknown>).accessKey = normalizedAccessKey;
     }
     const item = await prisma.folder.update({ where: { id }, data: updateData }) as unknown as FolderModel;
     return this.toFolderDTO(item);
@@ -307,3 +335,5 @@ export class LinksService {
     await prisma.link.delete({ where: { id } });
   }
 }
+
+export { FolderAccessDeniedError };

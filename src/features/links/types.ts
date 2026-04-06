@@ -8,6 +8,7 @@ export interface Category {
 export interface Folder {
   folder_id: string; // id
   category_id: string | null;
+  is_locked: boolean;
   title: string;
   weight: number;
   timestamp: string;
@@ -57,7 +58,8 @@ export type UpdateCategoryRequest = Partial<CreateCategoryRequest>;
 export interface CreateFolderRequest {
   title: string;
   weight: number;
-  category_id: string;
+  category_id?: string | null;
+  access_key?: string | null;
 }
 
 export type UpdateFolderRequest = Partial<CreateFolderRequest>;
@@ -92,6 +94,7 @@ export type UpdateLinkRequest = Partial<CreateLinkRequest>;
 export interface FolderModel {
   id: string;
   categoryId: string;
+  accessKey: string | null;
   title: string;
   weight: number;
   createdAt: Date;

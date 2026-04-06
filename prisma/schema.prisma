@@ -25,6 +25,7 @@ model Category {
 model Folder {
   id          String       @id @default(uuid())
   categoryId  String       @map("category_id")
+  accessKey   String?      @map("access_key")
   title       String
   weight      Int          @default(0)
   createdAt   DateTime     @default(now()) @map("created_at")

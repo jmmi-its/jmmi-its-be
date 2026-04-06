@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { LinksService } from './service.js';
+import { FolderAccessDeniedError } from './service.js';
 
 export class LinksController {
   private service: LinksService;
@@ -22,13 +23,18 @@ export class LinksController {
   getFolderDetail = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params as { id: string };
-      const data = await this.service.getFolderDetail(id);
+      const key = typeof req.query.key === 'string' ? req.query.key : undefined;
+      const data = await this.service.getFolderDetail(id, key);
       if (!data) {
         res.status(404).json({ status: false, message: 'Folder not found' });
         return;
       }
       res.json({ status: true, message: 'Folder detail retrieved', data });
     } catch (error) {
+      if (error instanceof FolderAccessDeniedError) {
+        res.status(403).json({ status: false, message: 'Folder key is required or invalid' });
+        return;
+      }
       res.status(500).json({ status: false, message: 'Error fetching folder detail', error });
     }
   };
