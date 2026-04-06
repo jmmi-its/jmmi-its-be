@@ -17,6 +17,7 @@ jobs:
            mkdir -p ~/.ssh
            echo "${{ secrets.SSH_PRIVATE_KEY_PROD }}" > ~/.ssh/id_rsa
            chmod 600 ~/.ssh/id_rsa
+           ssh-keyscan -H 43.157.203.200 >> ~/.ssh/known_hosts
       - name: Deploy using SSH
         run: |
           ssh ${{ secrets.USERNAME_PROD }}@43.157.203.200 -p 22 '~/./deploy.sh'
