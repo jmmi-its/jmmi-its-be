@@ -177,15 +177,16 @@ export class LinksService {
   }
 
   async createFolder(data: CreateFolderRequest): Promise<Folder> {
+    if (!data.category_id?.trim()) {
+      throw new Error('category_id is required to create folder');
+    }
+
     const normalizedAccessKey = data.access_key?.trim() ? data.access_key.trim() : null;
     const createData: Prisma.FolderCreateInput = {
       title: data.title,
-      weight: data.weight
+      weight: data.weight,
+      category: { connect: { id: data.category_id } }
     };
-
-    if (data.category_id) {
-      createData.category = { connect: { id: data.category_id } };
-    }
 
     if (normalizedAccessKey) {
       (createData as unknown as Record<string, unknown>).accessKey = normalizedAccessKey;
@@ -203,10 +204,8 @@ export class LinksService {
     if (data.title !== undefined) updateData.title = data.title;
     if (data.weight !== undefined) updateData.weight = data.weight;
 
-    if (data.category_id !== undefined && data.category_id) {
+    if (data.category_id !== undefined && data.category_id?.trim()) {
       updateData.category = { connect: { id: data.category_id } };
-    } else if (data.category_id === null) {
-      updateData.category = { disconnect: true };
     }
 
     if (data.access_key !== undefined) {
