@@ -134,7 +134,12 @@ export class LinksService {
   }
 
   async updateCategory(id: string, data: UpdateCategoryRequest): Promise<Category> {
-    const item = await prisma.category.update({ where: { id }, data }) as unknown as CategoryModel;
+    const updateData: Prisma.CategoryUpdateInput = {};
+
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.weight !== undefined) updateData.weight = data.weight;
+
+    const item = await prisma.category.update({ where: { id }, data: updateData }) as unknown as CategoryModel;
     return this.toCategoryDTO(item);
   }
 
@@ -167,12 +172,12 @@ export class LinksService {
 
   async updateFolder(id: string, data: UpdateFolderRequest): Promise<Folder> {
     const updateData: Prisma.FolderUpdateInput = {};
-    
-    if (data.title) updateData.title = data.title;
-    if (data.weight) updateData.weight = data.weight;
-    
-    if (data.category_id) {
-       updateData.category = { connect: { id: data.category_id } };
+
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.weight !== undefined) updateData.weight = data.weight;
+
+    if (data.category_id !== undefined && data.category_id) {
+      updateData.category = { connect: { id: data.category_id } };
     }
     const item = await prisma.folder.update({ where: { id }, data: updateData }) as unknown as FolderModel;
     return this.toFolderDTO(item);
@@ -209,10 +214,10 @@ export class LinksService {
 
   async updateSubheading(id: string, data: UpdateSubheadingRequest): Promise<Subheading> {
     const updateData: Prisma.SubheadingUpdateInput = {};
-    if (data.title) updateData.title = data.title;
-    if (data.weight) updateData.weight = data.weight;
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.weight !== undefined) updateData.weight = data.weight;
 
-    if (data.folder_id) {
+    if (data.folder_id !== undefined) {
       updateData.folder = { connect: { id: data.folder_id } };
     }
     const item = await prisma.subheading.update({ where: { id }, data: updateData }) as unknown as SubheadingModel;
