@@ -67,8 +67,6 @@ async function main(): Promise<void> {
     console.log(`Created staff announcement for: ${user.name}`);
   }
 
-
-
   console.log('Seeding finished.');
 }
 

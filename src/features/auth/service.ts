@@ -72,4 +72,26 @@ export class AuthService {
       return null;
     }
   }
+
+  async register(email: string, password: string, name: string): Promise<LoginResponse | null> {
+    const existingAdmin = await prisma.admin.findUnique({
+      where: { email },
+    });
+
+    if (existingAdmin) {
+      return null;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const admin = await prisma.admin.create({
+      data: {
+        email,
+        name,
+        password: hashedPassword,
+      },
+    });
+
+    return this.generateTokens(admin as unknown as AdminModel);
+  }
 }
