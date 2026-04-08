@@ -1,40 +1,28 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import config from '../../config/env.js';
 import prisma from '../../utils/db.js';
 import { AdminModel, LoginResponse } from './types.js';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-
 export class AuthService {
   async login(email: string, password: string): Promise<LoginResponse | null> {
-    let admin = (await prisma.admin.findUnique({
+    const admin = await prisma.admin.findUnique({
       where: { email },
-    })) as unknown as AdminModel | null;
+    });
 
-    // Existing admin:
-    // Accept either stored password or ADMIN_PASSWORD (useful when env password rotates).
-    if (admin) {
-      const isValidPassword =
-        password === admin.password || password === ADMIN_PASSWORD;
-
-      if (!isValidPassword) {
-        return null;
-      }
-    } else {
-      // First-time admin creation must use ADMIN_PASSWORD.
-      if (password !== ADMIN_PASSWORD) {
-        return null;
-      }
-
-      admin = (await prisma.admin.create({
-        data: {
-          email,
-          name: email.split('@')[0],
-          password: ADMIN_PASSWORD,
-        },
-      })) as unknown as AdminModel;
+    if (!admin) {
+      return null;
     }
 
+    const isValidPassword = await bcrypt.compare(password, admin.password);
+    if (!isValidPassword) {
+      return null;
+    }
+
+    return this.generateTokens(admin as unknown as AdminModel);
+  }
+
+  private generateTokens(admin: AdminModel): LoginResponse {
     const access_token = jwt.sign(
       {
         adminId: admin.id,
@@ -44,6 +32,7 @@ export class AuthService {
       config.jwtSecret,
       { expiresIn: config.jwtAccessExpiresIn as jwt.SignOptions['expiresIn'] }
     );
+
     const refresh_token = jwt.sign(
       {
         adminId: admin.id,
