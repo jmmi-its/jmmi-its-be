@@ -84,4 +84,41 @@ export class AuthController {
       });
     }
   };
+
+  register = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { email, password, name } = req.body;
+
+      if (!email || !password || !name) {
+        res.status(400).json({
+          status: false,
+          message: 'Email, password, and name are required',
+        });
+        return;
+      }
+
+      const result = await this.service.register(email, password, name);
+
+      if (!result) {
+        res.status(400).json({
+          status: false,
+          message: 'Failed to register admin',
+        });
+        return;
+      }
+
+      res.status(201).json({
+        status: true,
+        message: 'Admin registered successfully',
+        data: result,
+      });
+    } catch (error) {
+      console.error('Error in AuthController.register:', error);
+      res.status(500).json({
+        status: false,
+        message: 'Internal server error',
+        error: String(error),
+      });
+    }
+  };
 }

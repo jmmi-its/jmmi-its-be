@@ -20,6 +20,20 @@ export interface LoginResponse {
   refresh_token: string;
 }
 
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+export interface RegisterResponse {
+  id: string;
+  email: string;
+  name: string;
+  access_token: string;
+  refresh_token: string;
+}
+
 export interface VerifyTokenPayload {
   adminId: string;
   email: string;

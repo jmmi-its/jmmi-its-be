@@ -6,5 +6,6 @@ const controller = new AuthController();
 
 authRouter.post('/login', controller.login);
 authRouter.post('/verify', controller.verify);
+authRouter.post('/register', controller.register);
 
 export { authRouter };

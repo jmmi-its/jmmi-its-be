@@ -1,25 +1,44 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import bcrypt from 'bcrypt';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+const SALT_ROUNDS = 10;
+
 async function main(): Promise<void> {
   console.log('Start seeding ...');
 
+  const hashedPassword = await bcrypt.hash(
+    process.env.ADMIN_PASSWORD || 'adminPassword123',
+    SALT_ROUNDS
+  );
+
   // Seed Admin
-  const admin = await prisma.admin.upsert({
-    where: { email: 'admin@jmmi.com' },
-    update: {},
-    create: {
-      email: 'admin@jmmi.com',
-      password: process.env.ADMIN_PASSWORD || 'adminPassword123',
-      name: 'Admin JMMI',
+  const admins = [
+    {
+      email: 'admin1@jmmi.com',
+      password: hashedPassword,
+      name: 'Wakil Bidang 1',
     },
-  });
-  console.log(`Created admin: ${admin.name}`);
+    {
+      email: 'admin@jmmi.com',
+      password: hashedPassword,
+      name: 'Admin JMMI',
+    }
+  ]
+
+  for (const adminData of admins) {
+    const admin = await prisma.admin.upsert({
+      where: { email: adminData.email },
+      update: {},
+      create: adminData,
+    });
+    console.log(`Created admin: ${admin.name}`);
+  }
 
   const staffAnnouncements = [
     {
@@ -47,8 +66,6 @@ async function main(): Promise<void> {
     });
     console.log(`Created staff announcement for: ${user.name}`);
   }
-
-
 
   console.log('Seeding finished.');
 }
