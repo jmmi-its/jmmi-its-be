@@ -227,6 +227,21 @@ export class LinksController {
     }
   };
 
+  redirectShortLink = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { shortCode } = req.params as { shortCode: string };
+      const data = await this.service.redirectShortLink(shortCode);
+      if (!data) {
+        res.status(404).json({ status: false, message: 'Short link not found' });
+        return;
+      }
+
+      res.redirect(302, data.link);
+    } catch (error) {
+      res.status(500).json({ status: false, message: 'Error redirecting short link', error });
+    }
+  };
+
   createLink = async (req: Request, res: Response): Promise<void> => {
     try {
       const data = await this.service.createLink(req.body);

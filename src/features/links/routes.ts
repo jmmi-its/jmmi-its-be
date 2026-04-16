@@ -6,6 +6,7 @@ const controller = new LinksController();
 
 // --- Public / Aggregated Views ---
 linksRouter.get('/homepage', controller.getHomepage);
+linksRouter.get('/go/:shortCode', controller.redirectShortLink);
 // Folder detail is also mapped to /folders/:id below (as GET /folders/:id)
 
 // --- Categories ---

@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { randomBytes } from 'crypto';
 import prisma from '../../utils/db.js';
 import {
   Category,
@@ -29,6 +30,56 @@ class FolderAccessDeniedError extends Error {
 }
 
 export class LinksService {
+  private buildShortPath(shortCode: string): string {
+    return `/s/${shortCode}`;
+  }
+
+  private normalizeShortCode(value: string): string | null {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48);
+
+    return normalized || null;
+  }
+
+  private async ensureUniqueShortCode(
+    preferredCode: string,
+    excludeId?: string
+  ): Promise<string> {
+    let candidate = preferredCode;
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const existing = await prisma.link.findFirst({
+        where: excludeId
+          ? { shortCode: candidate, NOT: { id: excludeId } }
+          : { shortCode: candidate },
+        select: { id: true }
+      });
+
+      if (!existing) {
+        return candidate;
+      }
+
+      candidate = `${preferredCode}-${randomBytes(2).toString('hex')}`;
+    }
+
+    return `${preferredCode}-${randomBytes(4).toString('hex')}`;
+  }
+
+  private async resolveShortCode(
+    title: string,
+    shortCode?: string | null,
+    excludeId?: string
+  ): Promise<string> {
+    const normalizedShortCode = shortCode ? this.normalizeShortCode(shortCode) : null;
+    const baseCode = normalizedShortCode || this.normalizeShortCode(title) || `link-${randomBytes(3).toString('hex')}`;
+
+    return this.ensureUniqueShortCode(baseCode, excludeId);
+  }
+
   // Private Mappers
   private toCategoryDTO(item: CategoryModel): Category {
     return {
@@ -66,9 +117,12 @@ export class LinksService {
       category_id: item.categoryId,
       folder_id: item.folderId,
       subheading_id: item.subheadingId,
+      short_code: item.shortCode,
+      short_path: this.buildShortPath(item.shortCode),
       title: item.title,
       link: item.url,
       weight: item.weight,
+      click_count: item.clickCount,
       timestamp: item.createdAt.toISOString()
     };
   }
@@ -272,11 +326,27 @@ export class LinksService {
     return item ? this.toLinkDTO(item) : null;
   }
 
+  async redirectShortLink(shortCode: string): Promise<Link | null> {
+    const item = await prisma.link.findUnique({ where: { shortCode } }) as unknown as LinkModel | null;
+    if (!item) {
+      return null;
+    }
+
+    await prisma.link.update({
+      where: { id: item.id },
+      data: { clickCount: { increment: 1 } }
+    });
+
+    return this.toLinkDTO(item);
+  }
+
   async createLink(data: CreateLinkRequest): Promise<Link> {
+    const shortCode = await this.resolveShortCode(data.title, data.short_code);
     const createData: Prisma.LinkCreateInput = {
       title: data.title,
       url: data.link, // map `link` to `url`
-      weight: data.weight
+      weight: data.weight,
+      shortCode
     };
 
     if (data.subheading_id) {
@@ -295,10 +365,23 @@ export class LinksService {
   }
 
   async updateLink(id: string, data: UpdateLinkRequest): Promise<Link> {
+    const currentItem = await prisma.link.findUnique({ where: { id } }) as unknown as LinkModel | null;
+    if (!currentItem) {
+      throw new Error('Link not found');
+    }
+
     const updateData: Prisma.LinkUpdateInput = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.link !== undefined) updateData.url = data.link; // map
     if (data.weight !== undefined) updateData.weight = data.weight;
+
+    if (data.short_code !== undefined) {
+      const codeSource = data.short_code?.trim()
+        ? data.short_code
+        : data.title ?? currentItem.title;
+      const shortCode = await this.resolveShortCode(codeSource, data.short_code, id);
+      updateData.shortCode = shortCode;
+    }
 
     if (data.subheading_id !== undefined && data.subheading_id !== null) {
       if (data.folder_id !== undefined && data.folder_id !== null) {

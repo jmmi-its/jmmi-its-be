@@ -53,9 +53,11 @@ model Link {
   categoryId   String?     @map("category_id")
   folderId     String?     @map("folder_id")
   subheadingId String?     @map("subheading_id")
+  shortCode    String      @unique @map("short_code")
   title        String
   url          String
   weight       Int         @default(0)
+  clickCount   Int         @default(0) @map("click_count")
   createdAt    DateTime    @default(now()) @map("created_at")
   category     Category?   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   folder       Folder?     @relation(fields: [folderId], references: [id], onDelete: Cascade)
