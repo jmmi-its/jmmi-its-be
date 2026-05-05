@@ -21,9 +21,11 @@ app.use(cors({
     'https://api.jmmi-its.my.id',
     'https://jmmi-its.my.id',
     'https://www.jmmi-its.my.id',
+    'https://api.jmmi-its.com',
     'https://jmmi-its.com',
     'https://www.jmmi-its.com',
     'http://localhost:3000', // For local development
+    'http://localhost:3001', // For local development (alternate port)
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
