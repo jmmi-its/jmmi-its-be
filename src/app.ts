@@ -15,8 +15,7 @@ const linksController = new LinksController();
 
 app.set('trust proxy', 1);  
 
-// CORS Middleware - Must be first!
-app.use(cors({
+const corsOptions = {
   origin: [
     'https://api.jmmi-its.my.id',
     'https://jmmi-its.my.id',
@@ -24,18 +23,21 @@ app.use(cors({
     'https://api.jmmi-its.com',
     'https://jmmi-its.com',
     'https://www.jmmi-its.com',
-    'http://localhost:3000', // For local development
-    'http://localhost:3001', // For local development (alternate port)
+    'http://localhost:3000',
+    'http://localhost:3001',
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400, // 24 hours
-}));
+  maxAge: 86400,
+};
+
+// CORS Middleware - Must be first!
+app.use(cors(corsOptions));
 
 // Handle preflight requests - Regex used to avoid Express 5 wildcard error
-app.options(/(.*)/, cors());
+app.options(/(.*)/, cors(corsOptions));
 
 // Other Middleware
 app.use(express.json());
