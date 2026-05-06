@@ -3,15 +3,16 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { linksRouter } from './features/links/routes.js';
-import { LinksController } from './features/links/controller.js';
 import { announcementRouter } from './features/announcements/routes.js';
 import { financeRouter } from './features/finance/routes.js';
 import { authRouter } from './features/auth/routes.js';
 import { calendarRouter } from './features/calendar/routes.js';
+import { shortlinksRouter } from './features/shortlinks/routes.js';
+import { ShortLinksController } from './features/shortlinks/controller.js';
 import config from './config/env.js';
 
 const app = express();
-const linksController = new LinksController();
+const shortlinksController = new ShortLinksController();
 
 app.set('trust proxy', 1);  
 
@@ -57,11 +58,12 @@ app.get('/ping', (_req, res) => {
 });
 
 // Public short-link redirect
-app.get('/s/:shortCode', linksController.redirectShortLink);
+app.get('/s/:shortCode', shortlinksController.redirectShortLink);
 
 // Feature Routes
 app.use('/api/auth', authRouter);
 app.use('/api/links', linksRouter);
+app.use('/api/shortlinks', shortlinksRouter);
 app.use('/api/announcement', announcementRouter);
 app.use('/api/finance', financeRouter);
 app.use('/api/calendar', calendarRouter);
