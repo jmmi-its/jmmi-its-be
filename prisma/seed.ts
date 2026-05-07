@@ -1,5 +1,6 @@
 import pkg from '@prisma/client';
 // Support both named and default exports from @prisma/client across Prisma/Node versions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const PrismaClient: any = (pkg as any).PrismaClient ?? (pkg as any).default ?? pkg;
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
