@@ -61,6 +61,12 @@ export class ShortLinksService {
     return this.ensureUniqueShortCode(baseCode, excludeId);
   }
 
+  private normalizeUrl(url: string): string {
+    const trimmed = url.trim();
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  }
+
   private toDTO(item: ShortLinkModel): ShortLink {
     return {
       short_link_id: item.id,
@@ -97,10 +103,11 @@ export class ShortLinksService {
   }
 
   async create(data: CreateShortLinkRequest): Promise<ShortLink> {
-    const shortCode = await this.resolveShortCode(data.url, data.short_code);
+    const normalizedUrl = this.normalizeUrl(data.url);
+    const shortCode = await this.resolveShortCode(normalizedUrl, data.short_code);
     const item = await prisma.shortLink.create({
       data: {
-        url: data.url,
+        url: normalizedUrl,
         shortCode
       }
     }) as unknown as ShortLinkModel;
@@ -114,11 +121,15 @@ export class ShortLinksService {
     }
 
     const updateData: Prisma.ShortLinkUpdateInput = {};
-    if (data.url !== undefined) updateData.url = data.url;
+    let newUrl: string | undefined = undefined;
+    if (data.url !== undefined) {
+      newUrl = this.normalizeUrl(data.url);
+      updateData.url = newUrl;
+    }
 
     if (data.short_code !== undefined) {
       const codeSource = data.short_code?.trim() || currentItem.shortCode;
-      const shortCode = await this.resolveShortCode(data.url || currentItem.url, codeSource, id);
+      const shortCode = await this.resolveShortCode(newUrl || currentItem.url, codeSource, id);
       updateData.shortCode = shortCode;
     }
 
