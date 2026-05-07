@@ -6,10 +6,10 @@
 
 */
 -- DropIndex
-DROP INDEX "links_category_id_idx";
+DROP INDEX IF EXISTS "links_category_id_idx";
 
 -- DropIndex
-DROP INDEX "links_short_code_key";
+DROP INDEX IF EXISTS "links_short_code_key";
 
 -- AlterTable
 ALTER TABLE "links" DROP COLUMN "click_count",
