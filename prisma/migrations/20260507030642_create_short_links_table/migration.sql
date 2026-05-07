@@ -12,8 +12,8 @@ DROP INDEX IF EXISTS "links_category_id_idx";
 DROP INDEX IF EXISTS "links_short_code_key";
 
 -- AlterTable
-ALTER TABLE "links" DROP COLUMN "click_count",
-DROP COLUMN "short_code";
+ALTER TABLE "links" DROP COLUMN IF EXISTS "click_count",
+DROP COLUMN IF EXISTS "short_code";
 
 -- CreateTable
 CREATE TABLE "short_links" (
