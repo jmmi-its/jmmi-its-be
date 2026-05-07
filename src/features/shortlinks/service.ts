@@ -49,7 +49,7 @@ export class ShortLinksService {
   }
 
   private async resolveShortCode(
-    url: string,
+    _url: string,
     shortCode?: string | null,
     excludeId?: string
   ): Promise<string> {
