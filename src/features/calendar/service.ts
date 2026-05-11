@@ -11,7 +11,7 @@ interface CalendarEventDelegate {
   findMany: (args: {
     skip?: number;
     take?: number;
-    where?: any;
+    where?: Record<string, unknown>;
     orderBy: Array<Record<string, 'asc' | 'desc'>>;
   }) => Promise<unknown>;
   create: (args: { data: Record<string, unknown> }) => Promise<unknown>;
