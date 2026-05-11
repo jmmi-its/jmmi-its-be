@@ -12,7 +12,8 @@ export class ShortLinksController {
     try {
       const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
       const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string, 10) || 10));
-      const paginatedData = await this.service.getAll(page, limit);
+      const search = (req.query.search as string) || '';
+      const paginatedData = await this.service.getAll(page, limit, search);
       res.json({ status: true, message: 'Short links retrieved', data: paginatedData });
     } catch (error) {
       res.status(500).json({ status: false, message: 'Error fetching short links', error });

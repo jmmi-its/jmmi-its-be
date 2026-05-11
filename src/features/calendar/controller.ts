@@ -29,7 +29,8 @@ export class CalendarController {
     try {
       const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
       const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string, 10) || 10));
-      const paginatedData = await this.service.getPublicEvents(page, limit);
+      const search = (req.query.search as string) || '';
+      const paginatedData = await this.service.getPublicEvents(page, limit, search);
       res.json({ status: true, message: 'Calendar events retrieved', data: paginatedData });
     } catch (error) {
       res.status(500).json({
@@ -44,7 +45,8 @@ export class CalendarController {
     try {
       const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
       const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string, 10) || 10));
-      const paginatedData = await this.service.getAllEvents(page, limit);
+      const search = (req.query.search as string) || '';
+      const paginatedData = await this.service.getAllEvents(page, limit, search);
       res.json({ status: true, message: 'All calendar events retrieved', data: paginatedData });
     } catch (error) {
       res.status(500).json({

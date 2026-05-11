@@ -78,15 +78,23 @@ export class ShortLinksService {
     };
   }
 
-  async getAll(page = 1, limit = 10): Promise<{ data: ShortLink[]; total: number; page: number; limit: number }> {
+  async getAll(page = 1, limit = 10, search = ''): Promise<{ data: ShortLink[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
+    const whereClause = search.trim() ? {
+      OR: [
+        { shortCode: { contains: search, mode: 'insensitive' } },
+        { url: { contains: search, mode: 'insensitive' } }
+      ]
+    } : undefined;
+
     const [items, total] = await Promise.all([
       prisma.shortLink.findMany({
         skip,
         take: limit,
+        where: whereClause,
         orderBy: { createdAt: 'desc' }
       }) as unknown as Promise<ShortLinkModel[]>,
-      prisma.shortLink.count()
+      prisma.shortLink.count({ where: whereClause })
     ]);
     return {
       data: items.map(i => this.toDTO(i)),

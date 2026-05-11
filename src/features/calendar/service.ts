@@ -9,6 +9,9 @@ import {
 
 interface CalendarEventDelegate {
   findMany: (args: {
+    skip?: number;
+    take?: number;
+    where?: any;
     orderBy: Array<Record<string, 'asc' | 'desc'>>;
   }) => Promise<unknown>;
   create: (args: { data: Record<string, unknown> }) => Promise<unknown>;
@@ -43,15 +46,24 @@ export class CalendarService {
     };
   }
 
-  async getPublicEvents(page = 1, limit = 10): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
+  async getPublicEvents(page = 1, limit = 10, search = ''): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
+    const whereClause = search.trim() ? {
+      OR: [
+        { eventName: { contains: search, mode: 'insensitive' } },
+        { location: { contains: search, mode: 'insensitive' } },
+        { notes: { contains: search, mode: 'insensitive' } }
+      ]
+    } : undefined;
+
     const [records, total] = await Promise.all([
       (this.calendarEvent.findMany({
         skip,
         take: limit,
+        where: whereClause,
         orderBy: [{ eventDate: 'asc' }, { eventTime: 'asc' }, { createdAt: 'desc' }],
       })) as unknown as Promise<CalendarEventModel[]>,
-      (prisma.calendarEvent.count()) as unknown as Promise<number>
+      (prisma.calendarEvent.count({ where: whereClause })) as unknown as Promise<number>
     ]);
     return {
       data: records.map((item) => this.toCalendarEventDTO(item)),
@@ -61,15 +73,24 @@ export class CalendarService {
     };
   }
 
-  async getAllEvents(page = 1, limit = 10): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
+  async getAllEvents(page = 1, limit = 10, search = ''): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
+    const whereClause = search.trim() ? {
+      OR: [
+        { eventName: { contains: search, mode: 'insensitive' } },
+        { location: { contains: search, mode: 'insensitive' } },
+        { notes: { contains: search, mode: 'insensitive' } }
+      ]
+    } : undefined;
+
     const [records, total] = await Promise.all([
       (this.calendarEvent.findMany({
         skip,
         take: limit,
+        where: whereClause,
         orderBy: [{ eventDate: 'asc' }, { eventTime: 'asc' }, { createdAt: 'desc' }],
       })) as unknown as Promise<CalendarEventModel[]>,
-      (prisma.calendarEvent.count()) as unknown as Promise<number>
+      (prisma.calendarEvent.count({ where: whereClause })) as unknown as Promise<number>
     ]);
     return {
       data: records.map((item) => this.toCalendarEventDTO(item)),
