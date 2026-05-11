@@ -9,6 +9,13 @@ export interface FinanceTransaction {
   timestamp: string;
 }
 
+export interface PaginatedFinanceTransactions {
+  data: FinanceTransaction[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface FinanceReportData {
   total_income: number;
   total_expense: number;

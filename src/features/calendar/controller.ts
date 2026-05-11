@@ -25,10 +25,12 @@ export class CalendarController {
     this.service = new CalendarService();
   }
 
-  getPublicEvents = async (_req: Request, res: Response): Promise<void> => {
+  getPublicEvents = async (req: Request, res: Response): Promise<void> => {
     try {
-      const data = await this.service.getPublicEvents();
-      res.json({ status: true, message: 'Calendar events retrieved', data });
+      const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+      const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string, 10) || 10));
+      const paginatedData = await this.service.getPublicEvents(page, limit);
+      res.json({ status: true, message: 'Calendar events retrieved', data: paginatedData });
     } catch (error) {
       res.status(500).json({
         status: false,
@@ -38,10 +40,12 @@ export class CalendarController {
     }
   };
 
-  getAllEvents = async (_req: Request, res: Response): Promise<void> => {
+  getAllEvents = async (req: Request, res: Response): Promise<void> => {
     try {
-      const data = await this.service.getAllEvents();
-      res.json({ status: true, message: 'All calendar events retrieved', data });
+      const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+      const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string, 10) || 10));
+      const paginatedData = await this.service.getAllEvents(page, limit);
+      res.json({ status: true, message: 'All calendar events retrieved', data: paginatedData });
     } catch (error) {
       res.status(500).json({
         status: false,

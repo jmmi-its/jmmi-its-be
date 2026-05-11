@@ -7,6 +7,13 @@ export interface ShortLink {
   timestamp: string;
 }
 
+export interface PaginatedShortLinks {
+  data: ShortLink[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 // Requests
 export interface CreateShortLinkRequest {
   short_code?: string | null;

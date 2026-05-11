@@ -21,13 +21,15 @@ export class FinanceController {
     }
   };
 
-  getAllTransactions = async (_req: Request, res: Response): Promise<void> => {
+  getAllTransactions = async (req: Request, res: Response): Promise<void> => {
     try {
-      const data = await this.service.getAllTransactions();
+      const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+      const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string, 10) || 10));
+      const paginatedData = await this.service.getAllTransactions(page, limit);
       res.json({
         status: true,
         message: 'All transactions retrieved',
-        data,
+        data: paginatedData,
       });
     } catch (error) {
       res.status(500).json({

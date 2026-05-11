@@ -42,12 +42,22 @@ export class FinanceService {
     };
   }
 
-  async getAllTransactions(): Promise<FinanceTransaction[]> {
-    const records = (await prisma.financeTransaction.findMany({
-      orderBy: [{ transactionAt: 'desc' }, { createdAt: 'desc' }],
-    })) as unknown as FinanceTransactionModel[];
-
-    return records.map((item) => this.toTransactionDTO(item));
+  async getAllTransactions(page = 1, limit = 10): Promise<{ data: FinanceTransaction[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    const [records, total] = await Promise.all([
+      (await prisma.financeTransaction.findMany({
+        skip,
+        take: limit,
+        orderBy: [{ transactionAt: 'desc' }, { createdAt: 'desc' }],
+      })) as unknown as Promise<FinanceTransactionModel[]>,
+      (await prisma.financeTransaction.count()) as unknown as Promise<number>
+    ]);
+    return {
+      data: records.map((item) => this.toTransactionDTO(item)),
+      total,
+      page,
+      limit
+    };
   }
 
   async createTransaction(

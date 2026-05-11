@@ -8,10 +8,12 @@ export class ShortLinksController {
     this.service = new ShortLinksService();
   }
 
-  getAll = async (_req: Request, res: Response): Promise<void> => {
+  getAll = async (req: Request, res: Response): Promise<void> => {
     try {
-      const data = await this.service.getAll();
-      res.json({ status: true, message: 'Short links retrieved', data });
+      const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+      const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string, 10) || 10));
+      const paginatedData = await this.service.getAll(page, limit);
+      res.json({ status: true, message: 'Short links retrieved', data: paginatedData });
     } catch (error) {
       res.status(500).json({ status: false, message: 'Error fetching short links', error });
     }

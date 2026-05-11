@@ -43,20 +43,40 @@ export class CalendarService {
     };
   }
 
-  async getPublicEvents(): Promise<CalendarEvent[]> {
-    const records = (await this.calendarEvent.findMany({
-      orderBy: [{ eventDate: 'asc' }, { eventTime: 'asc' }, { createdAt: 'desc' }],
-    })) as unknown as CalendarEventModel[];
-
-    return records.map((item) => this.toCalendarEventDTO(item));
+  async getPublicEvents(page = 1, limit = 10): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    const [records, total] = await Promise.all([
+      (this.calendarEvent.findMany({
+        skip,
+        take: limit,
+        orderBy: [{ eventDate: 'asc' }, { eventTime: 'asc' }, { createdAt: 'desc' }],
+      })) as unknown as Promise<CalendarEventModel[]>,
+      (prisma.calendarEvent.count()) as unknown as Promise<number>
+    ]);
+    return {
+      data: records.map((item) => this.toCalendarEventDTO(item)),
+      total,
+      page,
+      limit
+    };
   }
 
-  async getAllEvents(): Promise<CalendarEvent[]> {
-    const records = (await this.calendarEvent.findMany({
-      orderBy: [{ eventDate: 'asc' }, { eventTime: 'asc' }, { createdAt: 'desc' }],
-    })) as unknown as CalendarEventModel[];
-
-    return records.map((item) => this.toCalendarEventDTO(item));
+  async getAllEvents(page = 1, limit = 10): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    const [records, total] = await Promise.all([
+      (this.calendarEvent.findMany({
+        skip,
+        take: limit,
+        orderBy: [{ eventDate: 'asc' }, { eventTime: 'asc' }, { createdAt: 'desc' }],
+      })) as unknown as Promise<CalendarEventModel[]>,
+      (prisma.calendarEvent.count()) as unknown as Promise<number>
+    ]);
+    return {
+      data: records.map((item) => this.toCalendarEventDTO(item)),
+      total,
+      page,
+      limit
+    };
   }
 
   async createEvent(payload: CreateCalendarEventPayload): Promise<CalendarEvent> {

@@ -14,6 +14,13 @@ export interface CalendarEvent {
   updated_at: string;
 }
 
+export interface PaginatedCalendarEvents {
+  data: CalendarEvent[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface CalendarEventModel {
   id: string;
   eventName: string;
