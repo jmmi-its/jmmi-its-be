@@ -48,7 +48,8 @@ export class CalendarService {
 
   async getPublicEvents(page = 1, limit = 10, search = ''): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
-    const whereClause = search.trim() ? {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = search.trim() ? {
       OR: [
         { eventName: { contains: search, mode: 'insensitive' } },
         { location: { contains: search, mode: 'insensitive' } },
@@ -75,7 +76,8 @@ export class CalendarService {
 
   async getAllEvents(page = 1, limit = 10, search = ''): Promise<{ data: CalendarEvent[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
-    const whereClause = search.trim() ? {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = search.trim() ? {
       OR: [
         { eventName: { contains: search, mode: 'insensitive' } },
         { location: { contains: search, mode: 'insensitive' } },
