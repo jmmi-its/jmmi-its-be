@@ -6,6 +6,7 @@ const financeRouter = Router();
 const controller = new FinanceController();
 
 financeRouter.get('/report', controller.getReport);
+financeRouter.get('/transactions', controller.getAllTransactions);
 
 // Admin only routes - require authentication
 financeRouter.get('/admin/transactions', requireAuth, controller.getAllTransactions);
